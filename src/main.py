@@ -11,6 +11,7 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG) # enable debug loggi
 import serial
 import glob
 import time
+UTCoffset=int(-time.timezone/3600) # calculate UTC offset
 port = serial.Serial()
 
 # function for setting up the serial port
@@ -42,7 +43,13 @@ def setup():
                 pass
         port = input("\n Using port: ")
         port = serial.Serial(port, baudrate=9600, timeout=2.0)
-    
+
+# function for repairing time format AKA adding ":" to time string and time zone offset
+# input: 123456 
+# output: 12+XX:34:56 [local time]
+# format: [hh:mm:ss] 
+def repairTime(time):
+    return (str(int(time[:2])+UTCoffset)) + ":" + time[2:4] + ":" + time[4:6]
 
 # function for parsing data from GPS module
 def parseData(receivedData):
@@ -88,7 +95,7 @@ def parseData(receivedData):
 
     # GPRMC - Recommended Minimum Specific GPS/TRANSIT Data
     if messageID == "RMC":
-        logging.info("Time: %s" % (data[1]))
+        logging.info("Time: %s" % (repairTime(data[1])))
         status = ["active", "No fix avaibile", "invalid"]
         if   data[2] == "A": _sstatus = status[0]
         elif data[2] == "V": _sstatus = status[1]
@@ -225,7 +232,6 @@ def checkChecksum(word):
         return True
     else:
         return False
-
 
 def main():
     global port
