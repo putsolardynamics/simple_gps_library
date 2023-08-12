@@ -23,11 +23,14 @@ def setup():
         ports = serial.tools.list_ports.comports()
         for port, desc, hwid in sorted(ports):
             print("{}: {} [{}]".format(port, desc, hwid))
+        else:
+            print("No COM ports found")
+            sys.exit(1)
         COM = input("\n Using COM port: ")
         try:
             port = serial.Serial("COM" + COM, baudrate=9600, timeout=2.0)
         except:
-            logging.error("Could not find a serial port")
+            logging.error("Could not connect to a serial port")
             sys.exit(1)
 
     if os.name == "posix":
