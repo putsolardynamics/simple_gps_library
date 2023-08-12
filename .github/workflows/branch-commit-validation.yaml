@@ -1,0 +1,22 @@
+name: branch-commit-validation
+
+on:
+  pull_request:
+    branches: 
+      - '*'         # matches every branch that doesn't contain a '/'
+      - '*/*'       # matches every branch containing a single '/'
+      - '**'        # matches every branch
+jobs:
+  build:
+    name: branch-commit-validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: webiny/action-conventional-commits@v1.1.0
+      - uses: deepakputhraya/action-branch-name@master
+        with:
+          regex: '([a-z])+\/([a-z])+' # Regex the branch should match. This example enforces grouping
+          allowed_prefixes: 'feature,hotfix,chore,bug,ci' # All branches should start with the given prefix
+          ignore: master,develop # Ignore exactly matching branch names from convention
+          min_length: 5 # Min length of the branch name
+          max_length: 100 # Max length of the branch name
